@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://14iinsofaww6"]
+
+[ext_resource type="PackedScene" uid="uid://cn6vufjfrt1pc" path="res://coin.fbx" id="1_0t63x"]
+[ext_resource type="Script" uid="uid://bpoji8inao4m7" path="res://coin.gd" id="1_v7riw"]
+[ext_resource type="Texture2D" uid="uid://bmwecg8i5uiqn" path="res://textures/CoinStarNormal.TGA" id="2_v7riw"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6qpsl"]
+size = Vector3(1.5, 1.5, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pdq0q"]
+albedo_color = Color(1, 0.870588, 0.32549, 1)
+metallic = 1.0
+roughness = 0.25
+normal_enabled = true
+normal_texture = ExtResource("2_v7riw")
+
+[node name="Area3D" type="Area3D"]
+script = ExtResource("1_v7riw")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_6qpsl")
+debug_color = Color(0.565089, 0.558032, 1.92523e-07, 0.42)
+
+[node name="coin" parent="." instance=ExtResource("1_0t63x")]
+
+[node name="Coin" parent="coin" index="0"]
+transform = Transform3D(0.25, 0, 0, 0, -1.09278e-08, 0.25, 0, -0.25, -1.09278e-08, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_pdq0q")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+
+[editable path="coin"]

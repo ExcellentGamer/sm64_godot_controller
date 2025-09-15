@@ -1,0 +1,101 @@
+[gd_scene load_steps=3 format=3 uid="uid://cnedxfn2pxh2t"]
+
+[ext_resource type="PackedScene" uid="uid://bij84ol81kcts" path="res://level/interactable/kill_plane/kill_plane_3d.tscn" id="3_1g472"]
+[ext_resource type="Material" uid="uid://da188d7yrcfr8" path="res://level/platforms.tres" id="7_njuj4"]
+
+[node name="Level" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.397077, 0.906961, -0.140538, -0.257643, 0.0368162, 0.965539, 0.88088, 0.419602, 0.219053, -46.2949, 26.0377, -28.2154)
+visible = false
+shadow_enabled = true
+
+[node name="KillPlane" parent="." instance=ExtResource("3_1g472")]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -55.25, -17.7152, -20)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.8265, -9.5, -34.8208)
+material_override = ExtResource("7_njuj4")
+use_collision = true
+size = Vector3(59.6529, 19, 29.6416)
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="."]
+material_override = ExtResource("7_njuj4")
+use_collision = true
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, -6.5, -20)
+material_override = ExtResource("7_njuj4")
+use_collision = true
+size = Vector3(12, 25, 8)
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5103, -5.5, -45.6151)
+material_override = ExtResource("7_njuj4")
+use_collision = true
+size = Vector3(1.02063, 27, 8)
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.2188, -5.5, -45.6151)
+material_override = ExtResource("7_njuj4")
+use_collision = true
+size = Vector3(1.02063, 27, 8)
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.8879, -5.5, -45.6151)
+material_override = ExtResource("7_njuj4")
+use_collision = true
+size = Vector3(7.61578, 27, 8)
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.8879, -5.5, -24.0799)
+material_override = ExtResource("7_njuj4")
+use_collision = true
+size = Vector3(7.61578, 27, 8)
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.8879, -5.5, -34.6239)
+material_override = ExtResource("7_njuj4")
+use_collision = true
+size = Vector3(7.61578, 27, 8)
+
+[node name="CSGPolygon3D9" type="CSGPolygon3D" parent="CSGCombiner3D"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -9, -0.325308, -49.6542)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 3, 2, 3, 0)
+depth = 4.0
+material = ExtResource("7_njuj4")
+
+[node name="CSGCombiner" type="CSGCombiner3D" parent="."]
+material_override = ExtResource("7_njuj4")
+use_collision = true
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="CSGCombiner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 2, -22)
+material_override = ExtResource("7_njuj4")
+use_collision = true
+size = Vector3(7, 4, 4)
+
+[node name="CSGPolygon3D7" type="CSGPolygon3D" parent="CSGCombiner"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 3, 4, -24)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 3, 2, 3, 0)
+depth = 4.0
+material = ExtResource("7_njuj4")
+
+[node name="CSGCombiner3D2" type="CSGCombiner3D" parent="."]
+material_override = ExtResource("7_njuj4")
+use_collision = true
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="CSGCombiner3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, -29)
+material_override = ExtResource("7_njuj4")
+use_collision = true
+size = Vector3(4, 2, 4)
+
+[node name="CSGPolygon3D6" type="CSGPolygon3D" parent="CSGCombiner3D2"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 3, 0, -34)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 3, 2, 3, 0)
+depth = 4.0
+material = ExtResource("7_njuj4")

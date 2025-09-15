@@ -1,0 +1,48 @@
+[gd_scene load_steps=15 format=3 uid="uid://c1dqbrxhmec7n"]
+
+[ext_resource type="PackedScene" uid="uid://dfwcflp0mmvp0" path="res://player/Mario.fbx" id="1_4ckko"]
+[ext_resource type="Texture2D" uid="uid://uasonabum0b3" path="res://player/Textures/MarioBody.TGA" id="2_4gsdp"]
+[ext_resource type="Texture2D" uid="uid://dswq56lgft0ls" path="res://player/Textures/MarioBodySpecular.TGA" id="3_752v2"]
+[ext_resource type="Texture2D" uid="uid://c5kg47ikiwy4m" path="res://player/Textures/Face.TGA" id="4_76esm"]
+[ext_resource type="Texture2D" uid="uid://cd1umsf4668my" path="res://player/Textures/FaceSpecular.TGA" id="5_cdawk"]
+[ext_resource type="Texture2D" uid="uid://b7vggtfa7hhwb" path="res://player/Textures/EyeDiffuse.TGA" id="6_wv04r"]
+[ext_resource type="Texture2D" uid="uid://doli7ed2bivxq" path="res://player/Textures/MDisffuse.TGA" id="7_wv04r"]
+[ext_resource type="Texture2D" uid="uid://r0squngudaaq" path="res://player/Textures/MSpecular.TGA" id="8_fntcd"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_76esm"]
+albedo_texture = ExtResource("2_4gsdp")
+metallic = 1.0
+metallic_specular = 0.25
+metallic_texture = ExtResource("3_752v2")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4ckko"]
+metallic_specular = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fntcd"]
+albedo_texture = ExtResource("4_76esm")
+metallic = 1.0
+metallic_specular = 1.0
+metallic_texture = ExtResource("5_cdawk")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_se746"]
+albedo_texture = ExtResource("6_wv04r")
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_w1vf2"]
+albedo_texture = ExtResource("4_76esm")
+metallic_specular = 0.75
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_baxdt"]
+albedo_texture = ExtResource("7_wv04r")
+metallic_specular = 0.0
+metallic_texture = ExtResource("8_fntcd")
+
+[node name="Mario" instance=ExtResource("1_4ckko")]
+
+[node name="RerenderedMario" parent="Rootbone/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_76esm")
+surface_material_override/1 = SubResource("StandardMaterial3D_4ckko")
+surface_material_override/2 = SubResource("StandardMaterial3D_fntcd")
+surface_material_override/3 = SubResource("StandardMaterial3D_se746")
+surface_material_override/4 = SubResource("StandardMaterial3D_w1vf2")
+surface_material_override/5 = SubResource("StandardMaterial3D_baxdt")

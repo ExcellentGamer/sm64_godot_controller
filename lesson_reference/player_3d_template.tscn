@@ -1,0 +1,162 @@
+[gd_scene load_steps=21 format=3 uid="uid://b1ot6gn6tms6h"]
+
+[ext_resource type="Script" uid="uid://c5wb4pkr76ght" path="res://lesson_reference/player.gd" id="1_dpokc"]
+[ext_resource type="PackedScene" uid="uid://prh35jb6tjtd" path="res://player/sophia_skin/sophia_skin.tscn" id="2_4dj54"]
+[ext_resource type="ArrayMesh" uid="uid://cxyu4eunqt580" path="res://dust partical.obj" id="3_6y108"]
+[ext_resource type="AudioStream" uid="uid://bhoyegbjust84" path="res://player/sounds/robot_land.wav" id="3_kbqxf"]
+[ext_resource type="AudioStream" uid="uid://b4x0f4pgfifoo" path="res://player/sounds/robot_jump.wav" id="4_1v0dq"]
+[ext_resource type="AudioStream" uid="uid://c4ccggmfofxni" path="res://player/sounds/camera_mode.ogg" id="6_6y108"]
+[ext_resource type="AudioStream" uid="uid://d3sq8wvq0phgf" path="res://player/sounds/mario/Mario_Wah.wav" id="6_m3ubj"]
+[ext_resource type="AudioStream" uid="uid://bag375hb3x513" path="res://player/sounds/mario/Mario_Hoohoo.wav" id="7_bihfd"]
+[ext_resource type="AudioStream" uid="uid://dte1rjmbh2f5j" path="res://player/sounds/mario/Mario_Yahoo.wav" id="8_suahi"]
+[ext_resource type="AudioStream" uid="uid://m4jbdwom7why" path="res://player/sounds/mario/Mario_Yah.wav" id="9_4u5q4"]
+[ext_resource type="AudioStream" uid="uid://cpay0egixyg77" path="res://player/sounds/mario/Mario_Hoo.wav" id="10_6lndf"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_e8pdu"]
+radius = 0.4
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6y108"]
+size = Vector3(1, 2, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6y108"]
+albedo_color = Color(0.944281, 0.944281, 0.944281, 1)
+metallic_specular = 0.46
+roughness = 0.81
+
+[sub_resource type="Curve" id="Curve_3f17x"]
+_data = [Vector2(0, 0.742241), 0.0, 0.0, 0, 0, Vector2(0.139952, 0.986755), 0.129787, 0.129787, 0, 0, Vector2(0.631579, 1), 0.0, 0.0, 0, 0, Vector2(0.785885, 0.873668), -1.98736, -1.98736, 0, 0, Vector2(1, 0.0148119), -5.26067, 0.0, 0, 0]
+point_count = 5
+
+[sub_resource type="CurveTexture" id="CurveTexture_8asvs"]
+width = 32
+curve = SubResource("Curve_3f17x")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_tqdcj"]
+lifetime_randomness = 0.33
+particle_flag_rotate_y = true
+emission_shape = 1
+emission_sphere_radius = 0.1
+direction = Vector3(0, 1, 0)
+spread = 90.0
+initial_velocity_min = 0.1
+initial_velocity_max = 0.35
+gravity = Vector3(0, 0.5, 0)
+tangential_accel_min = -2.23517e-06
+tangential_accel_max = 0.199998
+scale_min = 0.0
+scale_max = 0.21
+scale_curve = SubResource("CurveTexture_8asvs")
+scale_over_velocity_max = 0.17
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vre6p"]
+size = Vector3(0.622437, 1.88562, 0.824097)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6lndf"]
+size = Vector3(1, 0.354248, 1)
+
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_h1hkf"]
+length = 0.5
+slide_on_slope = true
+
+[node name="Player" type="CharacterBody3D"]
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+script = ExtResource("1_dpokc")
+acceleration = 30.0
+
+[node name="CharacterCollisionShape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_e8pdu")
+
+[node name="Player" type="Area3D" parent="."]
+
+[node name="Player" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_6y108")
+debug_color = Color(0.572265, 0.555174, 1.92523e-07, 0.42)
+
+[node name="Mario" parent="." instance=ExtResource("2_4dj54")]
+unique_name_in_owner = true
+
+[node name="DustParticles" type="GPUParticles3D" parent="Mario"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.00760116, -0.190934)
+material_override = SubResource("StandardMaterial3D_6y108")
+cast_shadow = 0
+gi_mode = 0
+amount = 55
+amount_ratio = 0.517
+lifetime = 0.7
+explosiveness = 0.05
+randomness = 0.13
+process_material = SubResource("ParticleProcessMaterial_tqdcj")
+draw_pass_1 = ExtResource("3_6y108")
+
+[node name="PunchBox" type="Area3D" parent="Mario"]
+
+[node name="PunchBoxCol" type="CollisionShape3D" parent="Mario/PunchBox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0939331, 0.986553, 0.593611)
+shape = SubResource("BoxShape3D_vre6p")
+debug_color = Color(1, 0, 0, 0.419608)
+
+[node name="GroundPoundArea" type="Area3D" parent="Mario"]
+
+[node name="GroundPoundCol" type="CollisionShape3D" parent="Mario/GroundPoundArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.17395, 0)
+shape = SubResource("BoxShape3D_6lndf")
+debug_color = Color(1, 0, 0, 0.419608)
+
+[node name="CameraPivot" type="Node3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.09401, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+transform = Transform3D(-1, 2.1052e-08, -1.40279e-07, -3.23484e-08, 0.929023, 0.370022, 1.38112e-07, 0.370022, -0.929023, 0, 0.33984, 0)
+shape = SubResource("SeparationRayShape3D_h1hkf")
+spring_length = 8.0
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+unique_name_in_owner = true
+transform = Transform3D(1, 3.19744e-14, 2.13163e-14, 0, 1, 0, 0, 0, 1, -2.4869e-14, 2.38419e-07, 10)
+current = true
+fov = 50.0
+
+[node name="Sounds3D" type="Node3D" parent="."]
+
+[node name="LandingSound" type="AudioStreamPlayer3D" parent="Sounds3D"]
+unique_name_in_owner = true
+stream = ExtResource("3_kbqxf")
+volume_db = 1.0
+
+[node name="JumpSound" type="AudioStreamPlayer3D" parent="Sounds3D"]
+unique_name_in_owner = true
+stream = ExtResource("4_1v0dq")
+volume_db = 1.0
+
+[node name="Mario Wah" type="AudioStreamPlayer3D" parent="Sounds3D"]
+stream = ExtResource("6_m3ubj")
+
+[node name="Mario Hoohoo" type="AudioStreamPlayer3D" parent="Sounds3D"]
+stream = ExtResource("7_bihfd")
+
+[node name="Mario Yahoo" type="AudioStreamPlayer3D" parent="Sounds3D"]
+stream = ExtResource("8_suahi")
+
+[node name="Mario Yah" type="AudioStreamPlayer3D" parent="Sounds3D"]
+stream = ExtResource("9_4u5q4")
+
+[node name="Mario Hoo" type="AudioStreamPlayer3D" parent="Sounds3D"]
+stream = ExtResource("10_6lndf")
+
+[node name="CameraSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_6y108")
+volume_db = -10.0
+
+[node name="PunchTimer" type="Timer" parent="."]
+
+[node name="PunchComboTimer" type="Timer" parent="."]
+
+[node name="PunchForceDelayTimer" type="Timer" parent="."]
+wait_time = 0.1
+one_shot = true
