@@ -57,6 +57,9 @@ func dive_recover():
 func _on_recovery_timer_timeout():
 	recovered.emit()
 
+func longjump():
+	state_machine.travel("Jump") # TODO: Replace with the longjump animation
+
 func jump():
 	state_machine.travel("Jump")
 

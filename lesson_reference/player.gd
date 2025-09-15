@@ -30,6 +30,11 @@ extends CharacterBody3D
 @onready var _punch_timer: Timer = $PunchTimer
 @onready var _punch_box: Area3D = $Mario/PunchBox
 
+@export_group("Long Jump")
+@export var _longjump_forward_force := 15.0
+@export var _longjump_upward_boost := 18.0
+@export var _longjump_air_control := 0.2
+
 enum State {
 	STATE_NORMAL,
 	STATE_DIVE,
@@ -39,7 +44,8 @@ enum State {
 	STATE_PUNCH,
 	STATE_JUMP_KICK,
 	STATE_CROUCH,
-	STATE_CROUCH_SLIDE
+	STATE_CROUCH_SLIDE,
+	STATE_LONGJUMP
 }
 var _current_state := State.STATE_NORMAL
 
@@ -63,6 +69,9 @@ var _time_since_landed := 0.0 # Timer to track time on the ground
 var _is_backflipping := false
 var _is_dive_rollout := false
 
+var _crouch_slide_time := 0.0
+var _crouch_slide_longjump_window := 0.2 # 200ms forgiveness window
+
 @onready var _last_input_direction := global_basis.z
 @onready var _start_position := global_position
 @onready var _camera_pivot: Node3D = %CameraPivot
@@ -76,6 +85,7 @@ var _is_dive_rollout := false
 
 func _on_dive_recover_finished() -> void:
 	if _current_state == State.STATE_DIVE_RECOVER:
+		print("Returning to STATE_NORMAL after STATE_DIVE_RECOVER")
 		_current_state = State.STATE_NORMAL
 
 func _on_idle_animation_returned() -> void:
@@ -85,6 +95,7 @@ func _on_idle_animation_returned() -> void:
 func _on_punch_finished() -> void:
 	if _current_state == State.STATE_PUNCH:
 		if _punch_index >= 3:
+			print("Returning to STATE_NORMAL out of a punch state")
 			_current_state = State.STATE_NORMAL
 			_skin.idle()
 			_punch_index = 0
@@ -94,6 +105,7 @@ func _on_punch_finished() -> void:
 			_queued_next_punch = false
 			_punch_timer.start(_punch_duration)
 		else:
+			print("Returning to STATE_NORMAL out of a punch state")
 			_current_state = State.STATE_NORMAL
 			_skin.idle()
 			_punch_index = 0
@@ -209,19 +221,31 @@ func _physics_process(delta: float) -> void:
 			velocity.y = y_velocity + _gravity * delta
 			_time_since_landed += delta
 
-			# === Enter crouch or crouch slide ===
-			if is_on_floor() and Input.is_action_pressed("crouch"):
-				if ground_speed > 0.25:
-					_current_state = State.STATE_CROUCH_SLIDE
-					_skin.crouch() # <-- call your crouch-slide anim
-				else:
-					_current_state = State.STATE_CROUCH
-					velocity = Vector3.ZERO
-					_skin.crouch()
-				return
-
 			# -- Jump, Dive, and Punch Initiation --
 			if is_just_jumping and is_on_floor():
+				# --- Long Jump check (forgiving) ---
+				var crouch_pressed := Input.is_action_pressed("crouch")
+				if crouch_pressed and ground_speed > 0.25:  # lowered threshold
+					# Use horizontal momentum if available
+					var lg_forward := Vector3(velocity.x, 0.0, velocity.z)
+					if lg_forward.length() < 0.05:
+						# fallback to last input direction
+						lg_forward = _last_input_direction
+					if lg_forward.length_squared() == 0.0:
+						# absolute fallback: straight forward relative to Mario
+						lg_forward = -global_basis.z
+
+					print("State is now STATE_LONGJUMP (debug speed=", ground_speed, ")")
+					_current_state = State.STATE_LONGJUMP
+					_skin.longjump()
+					$"Sounds3D/Mario Yahoo".play()
+
+					# Apply boost
+					velocity = lg_forward.normalized() * _longjump_forward_force
+					velocity.y = _longjump_upward_boost
+					_jump_count = 0
+					return
+
 				jump_initiated_this_frame = true
 				if _time_since_landed < _jump_chain_time and _jump_count < 3:
 					# Only allow triple jump if Mario has horizontal movement
@@ -251,6 +275,7 @@ func _physics_process(delta: float) -> void:
 				_jump_sound.play()
 			# Dive input midair with no valid dive → jump kick
 			elif is_just_diving and not is_on_floor() and ground_speed <= _dive_speed_threshold and _is_backflipping == false and _is_dive_rollout == false:
+				print("State is now STATE_JUMP_KICK")
 				_current_state = State.STATE_JUMP_KICK
 				_skin.punch_3()
 				$"Sounds3D/Mario Hoo".play()
@@ -261,6 +286,7 @@ func _physics_process(delta: float) -> void:
 				velocity += kick_forward * 2.5
 				return
 			elif is_just_diving and is_on_floor() and ground_speed <= _dive_speed_threshold and _can_punch:
+				print("State is now STATE_PUNCH")
 				_current_state = State.STATE_PUNCH
 				_punch_index = 1
 				_can_punch = false
@@ -278,6 +304,7 @@ func _physics_process(delta: float) -> void:
 				$PunchForceDelayTimer.start()
 			elif is_just_diving and ground_speed > _dive_speed_threshold and _current_state != State.STATE_ROLLOUT:
 				dive_initiated_this_frame = true
+				print("State is now STATE_DIVE")
 				_current_state = State.STATE_DIVE
 				_skin.dive()
 				$"Sounds3D/Mario Yah".play()
@@ -285,7 +312,21 @@ func _physics_process(delta: float) -> void:
 				velocity = velocity + dive_velocity_boost
 				velocity.y = _dive_upward_lift
 				_jump_count = 0
-			
+
+			# === Enter crouch or crouch slide ===
+			if is_on_floor() and Input.is_action_pressed("crouch"):
+				if ground_speed > 0.25:
+					print("State is now STATE_CROUCH_SLIDE")
+					_current_state = State.STATE_CROUCH_SLIDE
+					_crouch_slide_time = 0.0
+					_skin.crouch()
+				else:
+					print("State is now STATE_CROUCH")
+					_current_state = State.STATE_CROUCH
+					velocity = Vector3.ZERO
+					_skin.crouch()
+				return
+
 			# This animation logic is now integrated into the movement checks
 			# IT WILL BE SKIPPED IF A JUMP OR PUNCH WAS INITIATED
 			if not _is_backflipping:
@@ -302,6 +343,7 @@ func _physics_process(delta: float) -> void:
 			velocity.y += _gravity * delta
 			_dust_particles.emitting = false
 			if is_on_floor():
+				print("State is now STATE_SLIDE")
 				_current_state = State.STATE_SLIDE
 				
 		State.STATE_SLIDE:
@@ -314,6 +356,7 @@ func _physics_process(delta: float) -> void:
 
 			if ground_speed <= _get_up_speed_threshold:
 				_skin.dive_recover()
+				print("State is now STATE_DIVE_RECOVER")
 				_current_state = State.STATE_DIVE_RECOVER
 				velocity = Vector3.ZERO
 				_jump_count = 0
@@ -441,29 +484,65 @@ func _physics_process(delta: float) -> void:
 				return
 
 			velocity.y += _gravity * delta
+			_crouch_slide_time += delta
 
-			# Apply sliding friction
-			var horizontal_velocity = Vector3(velocity.x, 0, velocity.z)
-			horizontal_velocity = horizontal_velocity.move_toward(Vector3.ZERO, _dive_friction_rate * 0.75 * delta)
-			velocity.x = horizontal_velocity.x
-			velocity.z = horizontal_velocity.z
+			# --- Longjump forgiveness check ---
+			if Input.is_action_just_pressed("jump") and _crouch_slide_time <= _crouch_slide_longjump_window:
+				var lg_forward := Vector3(velocity.x, 0.0, velocity.z)
+				if lg_forward.length() < 0.05:
+					lg_forward = _last_input_direction
+				if lg_forward.length_squared() == 0.0:
+					lg_forward = -global_basis.z
 
-			# Stay in slide animation
-			_skin.crouch()
+				print("State is now STATE_LONGJUMP (from crouch slide)")
+				_current_state = State.STATE_LONGJUMP
+				_skin.longjump()
+				$"Sounds3D/Mario Yahoo".play()
 
-			# If crouch released, go back to normal
+				velocity = lg_forward.normalized() * _longjump_forward_force
+				velocity.y = _longjump_upward_boost
+				_jump_count = 0
+				return
+
+			# --- Apply sliding friction ---
+			var horizontal := Vector3(velocity.x, 0.0, velocity.z)
+			horizontal = horizontal.move_toward(Vector3.ZERO, 10.0 * delta) # tweak friction value
+			velocity.x = horizontal.x
+			velocity.z = horizontal.z
+
+			# --- Cancel slide if crouch released OR slowed to stop ---
 			if not Input.is_action_pressed("crouch"):
+				print("Exiting crouch slide → normal (released crouch)")
 				_current_state = State.STATE_NORMAL
 				_skin.idle()
-				return
-
-			# If we slowed down enough, transition to crouch
-			if horizontal_velocity.length() <= _get_up_speed_threshold:
+			elif horizontal.length() < 0.1:
+				print("Exiting crouch slide → crouch (slowed to stop)")
 				_current_state = State.STATE_CROUCH
-				velocity.x = 0
-				velocity.z = 0
 				_skin.crouch()
-				return
+
+		State.STATE_LONGJUMP:
+			# Apply gravity
+			velocity.y += _gravity * delta
+
+			# Minimal air control
+			var move_input := Input.get_vector("move_left", "move_right", "move_up", "move_down", 0.4)
+			var forward := _camera.global_basis.z
+			var right := _camera.global_basis.x
+			var move_direction := (forward * move_input.y + right * move_input.x)
+			move_direction.y = 0.0
+			move_direction = move_direction.normalized()
+
+			# Minimal air control but applied as an additive to the existing velocity
+			if move_direction.length() > 0.0:
+				var control_force := move_direction * (move_speed * _longjump_air_control)
+				# add small influence to the current horizontal velocity rather than lerping toward control_force
+				velocity.x = lerp(velocity.x, velocity.x + control_force.x, clamp(delta * 6.0, 0.0, 1.0))
+				velocity.z = lerp(velocity.z, velocity.z + control_force.z, clamp(delta * 6.0, 0.0, 1.0))
+
+			# Transition back to normal when landing
+			if is_on_floor() and velocity.y <= 0.0:
+				_current_state = State.STATE_NORMAL
+				_skin.idle()
 
 	# Stop backflip animation once player starts falling
 	if _is_backflipping and velocity.y < 0.0:
